@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Repository\ConferenceRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
+use Twig\Environment;
 
 class ConferenceController extends AbstractController
 {
@@ -12,10 +14,10 @@ class ConferenceController extends AbstractController
      * 
      * Главная страница
      */
-    public function index()
+    public function index(Environment $twig, ConferenceRepository $conferenceRepository)
     {
         return $this->render('conference/index.html.twig', [
-            'controller_name' => 'ConferenceController',
+            'conferences' => $conferenceRepository->findAll(),
         ]);
     }
 }
