@@ -7,125 +7,207 @@ use Doctrine\ORM\Mapping as ORM;
 
 /**
  * @ORM\Entity(repositoryClass=CommentRepository::class)
+ * @ORM\HasLifecycleCallbacks()
  */
 class Comment
 {
-    /**
-     * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
-     */
-    private $id;
+	/**
+	 * @ORM\Id()
+	 * @ORM\GeneratedValue()
+	 * @ORM\Column(type="integer")
+	 */
+	private $id;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $author;
+	/**
+	 * @ORM\Column(type="string", length=255)
+	 */
+	private $author;
 
-    /**
-     * @ORM\Column(type="text")
-     */
-    private $text;
+	/**
+	 * @ORM\Column(type="text")
+	 */
+	private $text;
 
-    /**
-     * @ORM\Column(type="string", length=255)
-     */
-    private $email;
+	/**
+	 * @ORM\Column(type="string", length=255)
+	 */
+	private $email;
 
-    /**
-     * @ORM\Column(type="datetime")
-     */
-    private $createdAt;
+	/**
+	 * @ORM\Column(type="datetime")
+	 */
+	private $createdAt;
 
-    /**
-     * @ORM\ManyToOne(targetEntity=Conference::class, inversedBy="comments")
-     * @ORM\JoinColumn(nullable=false)
-     */
-    private $conference;
+	/**
+	 * @ORM\ManyToOne(targetEntity=Conference::class, inversedBy="comments")
+	 * @ORM\JoinColumn(nullable=false)
+	 */
+	private $conference;
 
-    /**
-     * @ORM\Column(type="string", length=255, nullable=true)
-     */
-    private $photo;
+	/**
+	 * @ORM\Column(type="string", length=255, nullable=true)
+	 */
+	private $photo;
 
-    public function __toString()
-    {
-        return (string)$this->getEmail();
-    }
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
+	/**
+	 * @return string
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function __toString()
+	{
+		return (string)$this->getEmail();
+	}
 
-    public function getAuthor(): ?string
-    {
-        return $this->author;
-    }
+	/**
+	 * @return int|null
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function getId(): ?int
+	{
+		return $this->id;
+	}
 
-    public function setAuthor(string $author): self
-    {
-        $this->author = $author;
+	/**
+	 * @return null|string
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function getAuthor(): ?string
+	{
+		return $this->author;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param string $author
+	 *
+	 * @return Comment
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function setAuthor(string $author): self
+	{
+		$this->author = $author;
 
-    public function getText(): ?string
-    {
-        return $this->text;
-    }
+		return $this;
+	}
 
-    public function setText(string $text): self
-    {
-        $this->text = $text;
+	/**
+	 * @return null|string
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function getText(): ?string
+	{
+		return $this->text;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param string $text
+	 *
+	 * @return Comment
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function setText(string $text): self
+	{
+		$this->text = $text;
 
-    public function getEmail(): ?string
-    {
-        return $this->email;
-    }
+		return $this;
+	}
 
-    public function setEmail(string $email): self
-    {
-        $this->email = $email;
+	/**
+	 * @return null|string
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function getEmail(): ?string
+	{
+		return $this->email;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param string $email
+	 *
+	 * @return Comment
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function setEmail(string $email): self
+	{
+		$this->email = $email;
 
-    public function getCreatedAt(): ?\DateTimeInterface
-    {
-        return $this->createdAt;
-    }
+		return $this;
+	}
 
-    public function setCreatedAt(\DateTimeInterface $createdAt): self
-    {
-        $this->createdAt = $createdAt;
+	/**
+	 * @return \DateTimeInterface|null
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function getCreatedAt(): ?\DateTimeInterface
+	{
+		return $this->createdAt;
+	}
 
-        return $this;
-    }
+	/**
+	 * @param \DateTimeInterface $createdAt
+	 *
+	 * @return Comment
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function setCreatedAt(\DateTimeInterface $createdAt): self
+	{
+		$this->createdAt = $createdAt;
 
-    public function getConference(): ?Conference
-    {
-        return $this->conference;
-    }
+		return $this;
+	}
 
-    public function setConference(?Conference $conference): self
-    {
-        $this->conference = $conference;
+	/**
+	 * Событие срабатывает, когда объект впервые сохранятся в базе данных
+	 *
+	 * @ORM\PrePersist()
+	 *
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function setCreatedAtValue()
+	{
+		$this->createdAt = new \DateTime();
+	}
 
-        return $this;
-    }
+	/**
+	 * @return Conference|null
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function getConference(): ?Conference
+	{
+		return $this->conference;
+	}
 
-    public function getPhoto(): ?string
-    {
-        return $this->photo;
-    }
+	/**
+	 * @param Conference|null $conference
+	 *
+	 * @return Comment
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function setConference(?Conference $conference): self
+	{
+		$this->conference = $conference;
 
-    public function setPhoto(?string $photo): self
-    {
-        $this->photo = $photo;
+		return $this;
+	}
 
-        return $this;
-    }
+	/**
+	 * @return null|string
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function getPhoto(): ?string
+	{
+		return $this->photo;
+	}
+
+	/**
+	 * @param null|string $photo
+	 *
+	 * @return Comment
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function setPhoto(?string $photo): self
+	{
+		$this->photo = $photo;
+
+		return $this;
+	}
 }
