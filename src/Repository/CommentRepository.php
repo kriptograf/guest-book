@@ -16,18 +16,36 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
  */
 class CommentRepository extends ServiceEntityRepository
 {
+	/** Количество комментариев на странице */
 	public const PAGINATOR_PER_PAGE = 2;
 
-    public function __construct(ManagerRegistry $registry)
-    {
-        parent::__construct($registry, Comment::class);
-    }
+	/**
+	 * CommentRepository constructor.
+	 *
+	 * @param ManagerRegistry $registry
+	 */
+	public function __construct(ManagerRegistry $registry)
+	{
+		parent::__construct($registry, Comment::class);
+	}
 
-    public function getCommentPaginator(Conference $conference, int $offset)
-    {
+	/**
+	 * Получить опубликованные комментарии с постраничной разбивкой
+	 *
+	 * @param Conference $conference
+	 * @param int        $offset
+	 *
+	 * @return Paginator
+	 *
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function getCommentPaginator(Conference $conference, int $offset)
+	{
 		$query = $this->createQueryBuilder('c')
 			->andWhere('c.conference = :conference')
+			->andWhere('c.status = :status')
 			->setParameter('conference', $conference)
+			->setParameter('status', 'published')
 			->orderBy('c.createdAt')
 			->setMaxResults(static::PAGINATOR_PER_PAGE)
 			->setFirstResult($offset)
@@ -35,34 +53,53 @@ class CommentRepository extends ServiceEntityRepository
 		;
 
 		return new Paginator($query);
-    }
+	}
 
-    // /**
-    //  * @return Comment[] Returns an array of Comment objects
-    //  */
-    /*
-    public function findByExampleField($value)
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->orderBy('c.id', 'ASC')
-            ->setMaxResults(10)
-            ->getQuery()
-            ->getResult()
-        ;
-    }
-    */
+	/**
+	 * Найти комментарий по email
+	 *
+	 * @param $value Email
+	 *
+	 * @return Comment|null
+	 * @throws \Doctrine\ORM\NonUniqueResultException
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	/*public function findOneByEmail($value): ?Comment
+	{
+		return $this->createQueryBuilder('c')
+			->andWhere('c.email = :val')
+			->setParameter('val', $value)
+			->getQuery()
+			->getOneOrNullResult()
+			;
+	}*/
 
-    /*
-    public function findOneBySomeField($value): ?Comment
-    {
-        return $this->createQueryBuilder('c')
-            ->andWhere('c.exampleField = :val')
-            ->setParameter('val', $value)
-            ->getQuery()
-            ->getOneOrNullResult()
-        ;
-    }
-    */
+	// /**
+	//  * @return Comment[] Returns an array of Comment objects
+	//  */
+	/*
+	public function findByExampleField($value)
+	{
+		return $this->createQueryBuilder('c')
+			->andWhere('c.exampleField = :val')
+			->setParameter('val', $value)
+			->orderBy('c.id', 'ASC')
+			->setMaxResults(10)
+			->getQuery()
+			->getResult()
+		;
+	}
+	*/
+
+	/*
+	public function findOneBySomeField($value): ?Comment
+	{
+		return $this->createQueryBuilder('c')
+			->andWhere('c.exampleField = :val')
+			->setParameter('val', $value)
+			->getQuery()
+			->getOneOrNullResult()
+		;
+	}
+	*/
 }

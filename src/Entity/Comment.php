@@ -55,6 +55,11 @@ class Comment
 	private $photo;
 
 	/**
+	 * @ORM\Column(type="string", length=255, options={"default": "submitted"})
+	 */
+	private $status = 'submitted';
+
+	/**
 	 * @return string
 	 * @author Виталий Москвин <foreach@mail.ru>
 	 */
@@ -212,6 +217,18 @@ class Comment
 	public function setPhoto(?string $photo): self
 	{
 		$this->photo = $photo;
+
+		return $this;
+	}
+
+	public function getStatus(): ?string
+	{
+		return $this->status;
+	}
+
+	public function setStatus(?string $status): self
+	{
+		$this->status = $status;
 
 		return $this;
 	}

@@ -5,14 +5,15 @@ namespace App\Controller;
 use App\Entity\Comment;
 use App\Entity\Conference;
 use App\Form\CommentFormType;
+use App\Message\CommentMessage;
 use App\Repository\CommentRepository;
 use App\Repository\ConferenceRepository;
-use App\Checker\SpamChecker;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -23,11 +24,16 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class ConferenceController extends AbstractController
 {
+	/** @var EntityManagerInterface  */
 	private $entityManager;
 
-	public function __construct(EntityManagerInterface $entityManager)
+	/** @var MessageBusInterface  */
+	private $bus;
+
+	public function __construct(EntityManagerInterface $entityManager, MessageBusInterface $bus)
 	{
 		$this->entityManager = $entityManager;
+		$this->bus           = $bus;
 	}
 
 	/**
@@ -56,14 +62,13 @@ class ConferenceController extends AbstractController
 	 * @param Request           $request
 	 * @param Conference        $conference
 	 * @param CommentRepository $commentRepository
-	 * @param SpamChecker       $spamChecker
 	 * @param string            $photoDir
 	 *
 	 * @return Response
 	 *
 	 * @author Виталий Москвин <foreach@mail.ru>
 	 */
-	public function show(Request $request, Conference $conference, CommentRepository $commentRepository, SpamChecker $spamChecker, string $photoDir)
+	public function show(Request $request, Conference $conference, CommentRepository $commentRepository, string $photoDir)
 	{
 		$comment = new Comment();
 		//Никогда не следует инициализировать класс формы напрямую. Для
@@ -87,6 +92,7 @@ class ConferenceController extends AbstractController
 			}
 
 			$this->entityManager->persist($comment);
+			$this->entityManager->flush();
 
 			// -- Проверка спам-чекром
 			$context = [
@@ -95,12 +101,8 @@ class ConferenceController extends AbstractController
 				'referrer' => $request->headers->get('referer'),
 				'permalink' => $request->getUri(),
 			];
-
-			if (2 === $spamChecker->getSpamScore($comment, $context)) {
-				throw new \RuntimeException('Blatant spam, go away!');
-			}
-
-			$this->entityManager->flush();
+			// отправляем сообщение на шину
+			$this->bus->dispatch(new CommentMessage($comment->getId(), $context));
 
 			return $this->redirectToRoute('conference', ['slug' => $conference->getSlug()]);
 		}

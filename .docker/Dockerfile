@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends --no-install-su
         libjpeg62-turbo-dev \
         libicu-dev \
         libpq-dev \
+        librabbitmq-dev \
         wget \
         jpegoptim \
         optipng \
@@ -33,3 +34,6 @@ RUN pecl install apcu \
 
 RUN pecl install -o -f xdebug \
     && rm -rf /tmp/pear
+
+RUN pecl install amqp \
+	&& docker-php-ext-enable amqp
