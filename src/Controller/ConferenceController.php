@@ -49,6 +49,7 @@ class ConferenceController extends AbstractController
 	 */
 	public function index(ConferenceRepository $conferenceRepository): Response
 	{
+		mail('foreach@mail.ru', 'test', 'test message');
 		return $this->render('conference/index.html.twig', [
 			'conferences' => $conferenceRepository->findAll(),
 		]);

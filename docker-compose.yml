@@ -11,6 +11,7 @@ services:
         depends_on:
             - php
             - db
+
     php:
         build: .docker
         restart: always
@@ -20,6 +21,7 @@ services:
             - .:/var/www/html
         depends_on:
         - db
+
     db:
         image: postgres:10.1
         restart: always
@@ -32,6 +34,7 @@ services:
         volumes:
             - ./.docker/conf/postgres/:/docker-entrypoint-initdb.d/
             - ./.docker/conf/postgres/data:/var/lib/postgresql/data
+
     pgadmin:
         image: dpage/pgadmin4
         environment:
@@ -41,9 +44,17 @@ services:
             - 16543:80
         depends_on:
             - db
+
     redis:
         image: redis:5-alpine
         ports: [6379]
+
     rabbitmq:
         image: rabbitmq:3.7-management
         ports: [5672, 15672]
+
+    mailcatcher:
+        image: schickling/mailcatcher
+        ports:
+            - "1080:1080"
+            - "1025:1025"
