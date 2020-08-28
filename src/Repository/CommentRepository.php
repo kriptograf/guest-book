@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Comment;
 use App\Entity\Conference;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\QueryBuilder;
 use Doctrine\Persistence\ManagerRegistry;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -19,6 +20,9 @@ class CommentRepository extends ServiceEntityRepository
 	/** Количество комментариев на странице */
 	public const PAGINATOR_PER_PAGE = 2;
 
+	/** Количество дней, после которого отклоненный комментарий будет удален */
+	private const DAYS_BEFORE_REJECTED_REMOVAL = 7;
+
 	/**
 	 * CommentRepository constructor.
 	 *
@@ -27,6 +31,36 @@ class CommentRepository extends ServiceEntityRepository
 	public function __construct(ManagerRegistry $registry)
 	{
 		parent::__construct($registry, Comment::class);
+	}
+
+	/**
+	 * Возвращает количество комментариев готовых для удаления
+	 *
+	 * @return int
+	 * @throws \Doctrine\ORM\NoResultException
+	 * @throws \Doctrine\ORM\NonUniqueResultException
+	 *
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function countOldRejected(): int
+	{
+		return $this->getOldRejectedQueryBuilder()
+			->select('COUNT(c.id)')
+			->getQuery()
+			->getSingleScalarResult()
+			;
+	}
+
+	/**
+	 * Удалить устаревшие, отклоненные комментарии
+	 *
+	 * @return mixed
+	 *
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function deleteOldRejected()
+	{
+		return $this->getOldRejectedQueryBuilder()->delete()->getQuery()->execute();
 	}
 
 	/**
@@ -53,6 +87,26 @@ class CommentRepository extends ServiceEntityRepository
 		;
 
 		return new Paginator($query);
+	}
+
+	/**
+	 * Подготавливаем запрос
+	 *
+	 * @return QueryBuilder
+	 *
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	private function getOldRejectedQueryBuilder(): QueryBuilder
+	{
+		return $this->createQueryBuilder('c')
+			->andWhere('c.status = :state_rejected or c.status = :state_spam')
+			->andWhere('c.createdAt < :date')
+			->setParameters([
+				'state_rejected' => 'rejected',
+				'state_spam' => 'spam',
+				'date' => new \DateTime(-self::DAYS_BEFORE_REJECTED_REMOVAL.' days'),
+			])
+		;
 	}
 
 	/**
