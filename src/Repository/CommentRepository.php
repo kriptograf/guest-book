@@ -18,7 +18,7 @@ use Doctrine\ORM\Tools\Pagination\Paginator;
 class CommentRepository extends ServiceEntityRepository
 {
 	/** Количество комментариев на странице */
-	public const PAGINATOR_PER_PAGE = 2;
+	public const PAGINATOR_PER_PAGE = 10;
 
 	/** Количество дней, после которого отклоненный комментарий будет удален */
 	private const DAYS_BEFORE_REJECTED_REMOVAL = 7;
