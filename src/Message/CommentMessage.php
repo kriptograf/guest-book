@@ -13,6 +13,9 @@ class CommentMessage
 	/** @var int  */
 	private $id;
 
+	/** @var string */
+	private $reviewUrl;
+
 	/** @var array  */
 	private $context;
 
@@ -22,9 +25,10 @@ class CommentMessage
 	 * @param int   $id
 	 * @param array $context
 	 */
-	public function __construct(int $id, array $context = [])
+	public function __construct(int $id, string $reviewUrl, array $context = [])
 	{
 		$this->id      = $id;
+		$this->reviewUrl = $reviewUrl;
 		$this->context = $context;
 	}
 
@@ -35,6 +39,15 @@ class CommentMessage
 	public function getId(): int
 	{
 		return $this->id;
+	}
+
+	/**
+	 * @return string
+	 * @author Виталий Москвин <foreach@mail.ru>
+	 */
+	public function getReviewUrl()
+	{
+		return $this->reviewUrl;
 	}
 
 	/**
